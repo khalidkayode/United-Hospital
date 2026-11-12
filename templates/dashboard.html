@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>{{ 'Administrator' if g.user.role_name == ADMIN else g.user.role_name }} Dashboard</h1>
+  <div class="muted">Welcome back, <b>{{ g.user.full_name }}</b> — here is the overview for today, {{ current_date }}</div></div>
+</div>
+<div class="grid g4">
+  <div class="stat s1"><div class="label">Total Patients</div><div class="num">{{ stats.patients }}</div><div class="sub">+{{ stats.new_month }} this month</div></div>
+  <div class="stat s2"><div class="label">Today's Consultations</div><div class="num">{{ stats.consult_today }}</div><div class="sub">{{ stats.consult_yday }} yesterday</div></div>
+  <div class="stat s3"><div class="label">Pending Lab Tests</div><div class="num">{{ stats.pending_lab }}</div><div class="sub">awaiting results</div></div>
+  <div class="stat s4"><div class="label">Prescriptions</div><div class="num">{{ stats.rx_total }}</div><div class="sub">{{ stats.rx_pending }} pending dispensing</div></div>
+</div>
+<div class="grid g21" style="margin-top:1rem">
+  <div class="card">
+    <div class="card-head"><h2>Recent Activities</h2><a href="{{ url_for('patients') }}" class="small">View all patients</a></div>
+    {% if recent %}
+    <div class="tablewrap"><table>
+      <thead><tr><th>Time</th><th>Patient</th><th>Activity</th><th>By</th></tr></thead>
+      <tbody>
+      {% for a in recent %}
+        <tr>
+          <td class="small">{{ a.created_at|fdate('%d %b, %I:%M %p') }}</td>
+          <td><b>{{ a.patient_name }}</b><div class="small muted">{{ a.patient_number }}</div></td>
+          <td>{{ a.action }}{% if a.details %}<div class="small muted">{{ a.details }}</div>{% endif %}</td>
+          <td class="small">{{ a.staff_name or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}<div class="empty">No activity recorded yet.</div>{% endif %}
+  </div>
+  <div class="card">
+    <h2>Quick Actions</h2>
+    <div class="actions" style="flex-direction:column">
+      {% if g.user.role_name in (ADMIN, DOCTOR) %}
+        <a class="btn" href="{{ url_for('patient_new') }}">+ Register New Patient</a>
+        <a class="btn alt" href="{{ url_for('appointments') }}">Schedule Appointment ({{ stats.appts_today }} today)</a>
+      {% endif %}
+      <a class="btn alt" href="{{ url_for('lab') }}">Review Lab Results</a>
+      <a class="btn alt" href="{{ url_for('patients') }}">Search Patient Records</a>
+      {% if g.user.role_name in (ADMIN, DOCTOR) %}<a class="btn alt" href="{{ url_for('reports') }}">Generate Report</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

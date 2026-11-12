@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% endblock %} · {{ hospital }} EPR</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set role = g.user.role_name if g.user else None %}
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+      <div><strong>{{ hospital }}</strong><span>Electronic Patient Record System</span></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Menu</div>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a>
+      <a href="{{ url_for('patients') }}" class="{{ 'active' if request.endpoint in ('patients','patient_detail') }}">Patients</a>
+      {% if role in (ADMIN, DOCTOR) %}
+      <a href="{{ url_for('patient_new') }}" class="{{ 'active' if request.endpoint == 'patient_new' }}">Register Patient</a>
+      <a href="{{ url_for('appointments') }}" class="{{ 'active' if request.endpoint == 'appointments' }}">Appointments</a>
+      <a href="{{ url_for('prescriptions') }}" class="{{ 'active' if request.endpoint == 'prescriptions' }}">Prescriptions</a>
+      {% endif %}
+      <a href="{{ url_for('lab') }}" class="{{ 'active' if request.endpoint in ('lab','lab_new','lab_result') }}">Lab Requests</a>
+      {% if role in (ADMIN, DOCTOR) %}
+      <a href="{{ url_for('reports') }}" class="{{ 'active' if request.endpoint == 'reports' }}">Reports</a>
+      {% endif %}
+      {% if role == ADMIN %}
+      <div class="nav-label">Administration</div>
+      <a href="{{ url_for('users') }}" class="{{ 'active' if request.endpoint == 'users' }}">Users &amp; Roles</a>
+      <a href="{{ url_for('audit') }}" class="{{ 'active' if request.endpoint == 'audit' }}">Audit Log</a>
+      {% endif %}
+    </nav>
+    <div class="side-foot">v1.0 · {{ current_date }}</div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <form class="search" action="{{ url_for('patients') }}" method="get">
+        <input type="search" name="q" placeholder="Search patients by name, ID or phone…" value="{{ request.args.get('q','') if request.endpoint == 'patients' }}">
+      </form>
+      <div class="userchip">
+        <div class="avatar">{{ g.user.full_name|initials }}</div>
+        <div class="who"><b>{{ g.user.full_name }}</b><span>{{ role }}</span></div>
+        <form action="{{ url_for('logout') }}" method="post" style="margin:0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn alt sm" type="submit">Logout</button>
+        </form>
+      </div>
+    </header>
+    <main class="content">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+</body>
+</html>

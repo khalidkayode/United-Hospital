@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}New Lab Request{% endblock %}
+{% block content %}
+<div class="pagehead"><div><div class="crumb"><a href="{{ url_for('lab') }}">Lab Requests</a> / New</div><h1>New Laboratory Request</h1></div></div>
+<div class="card" style="max-width:640px">
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Patient <span class="req">*</span></label>
+    <select name="patient_id"><option value="">Select patient</option>
+      {% for p in patients %}<option value="{{ p.patient_id }}">{{ p.first_name }} {{ p.last_name }} ({{ p.patient_number }})</option>{% endfor %}</select>
+    <label>Test <span class="req">*</span></label>
+    <select name="test_name"><option value="">Select test</option>{% for t in tests %}<option>{{ t }}</option>{% endfor %}</select>
+    <label>Or other test</label><input type="text" name="other_test" placeholder="Type test name">
+    <div class="actions"><button class="btn" type="submit">Create Request</button><a class="btn alt" href="{{ url_for('lab') }}">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

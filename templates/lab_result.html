@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Lab Result{% endblock %}
+{% block content %}
+<div class="pagehead"><div><div class="crumb"><a href="{{ url_for('lab') }}">Lab Requests</a> / {{ r.request_id|tcode }}</div><h1>Result Entry</h1></div></div>
+<div class="card" style="max-width:720px">
+  <div class="flash info" style="margin-bottom:1rem"><b>{{ r.request_id|tcode }}</b> — {{ r.patient_name }} ({{ r.patient_number }}) · {{ r.test_name }}
+    <div class="small">Requested by {{ r.requested_name }} on {{ r.request_date|fdate }}</div></div>
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  {% if result %}
+    <h3>Recorded result</h3>
+    <p>{{ result.result_text }}</p>
+    {% if result.remarks %}<p class="muted">{{ result.remarks }}</p>{% endif %}
+    <div class="small muted">Entered by {{ result.entered_name }} on {{ result.result_date|fdate('%d %b %Y, %I:%M %p') }}</div>
+  {% elif g.user.role_name == LAB %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Test Result <span class="req">*</span></label><textarea name="result_text" placeholder="e.g. WBC 6.8 x10^9/L; Hb 135 g/L — within normal range"></textarea>
+      <label>Remarks</label><textarea name="remarks" placeholder="e.g. No abnormal findings observed. Recommend routine follow-up."></textarea>
+      <div class="actions"><button class="btn" type="submit">Save Result</button><a class="btn alt" href="{{ url_for('lab') }}">Cancel</a></div>
+    </form>
+  {% else %}<p class="muted">Result pending. Only laboratory personnel can enter results.</p>{% endif %}
+</div>
+{% endblock %}

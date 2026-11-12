@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · {{ hospital }} EPR</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body class="loginpage">
+  <div class="loginbar"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <div><b>{{ hospital }}</b><span>Electronic Patient Record System</span></div></div>
+  <div class="errorpage">
+    <div class="code">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ message }}</p>
+    <p><a class="btn" href="{{ url_for('dashboard') if g.user else url_for('login') }}">{{ 'Back to dashboard' if g.user else 'Go to login' }}</a></p>
+  </div>
+</body></html>

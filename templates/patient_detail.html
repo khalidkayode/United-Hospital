@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ p.first_name }} {{ p.last_name }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><div class="crumb"><a href="{{ url_for('patients') }}">Patients</a> / {{ p.patient_number }}</div>
+  <h1>{{ p.first_name }} {{ p.last_name }} <span class="badge b-ok" style="vertical-align:middle">Active Patient</span></h1></div>
+  <div class="actions" style="margin:0">
+    {% if g.user.role_name == DOCTOR %}<a class="btn" href="{{ url_for('consult', pid=p.patient_id) }}">+ New Consultation</a>{% endif %}
+    {% if g.user.role_name in (ADMIN, DOCTOR) %}<a class="btn alt" href="{{ url_for('appointments') }}">Book Appointment</a>{% endif %}
+  </div>
+</div>
+<div class="grid g12">
+  <div class="card">
+    <h2>Patient Details</h2>
+    <dl class="kv">
+      <dt>Patient ID</dt><dd>{{ p.patient_number }}</dd>
+      <dt>{{ 'Matric No.' if p.patient_type == 'Student' else 'Staff ID' }}</dt><dd>{{ p.matric_staff_id }}</dd>
+      <dt>Age / Gender</dt><dd>{{ p.date_of_birth|age }} · {{ p.sex }}</dd>
+      <dt>Date of Birth</dt><dd>{{ p.date_of_birth|fdate }}</dd>
+      <dt>Phone</dt><dd>{{ p.phone|phone }}</dd>
+      <dt>Email</dt><dd>{{ p.email or '—' }}</dd>
+      <dt>Address</dt><dd>{{ p.address }}</dd>
+      <dt>Blood Group</dt><dd>{{ p.blood_group }}</dd>
+      <dt>Allergies</dt><dd>{% if p.allergies and p.allergies != 'None' %}<span class="badge pill-allergy">{{ p.allergies }}</span>{% else %}None{% endif %}</dd>
+      <dt>Emergency Contact</dt><dd>{{ p.emergency_contact|phone }}</dd>
+      <dt>Registered</dt><dd>{{ p.created_at|fdate }}</dd>
+    </dl>
+    {% if appts %}
+      <h3 style="margin-top:1rem">Upcoming Appointments</h3>
+      {% for a in appts %}<div class="small">{{ a.appointment_date|fdate }} at {{ a.appointment_time }} · {{ a.doctor_name }}</div>{% endfor %}
+    {% endif %}
+  </div>
+  <div>
+    {% if clinical %}
+    <div class="card">
+      <h2>Medical History Timeline</h2>
+      <div class="muted small" style="margin-bottom:.8rem">Chronological record of visits and clinical events</div>
+      {% if consultations %}
+      <ul class="timeline">
+        {% for c in consultations %}
+        <li>
+          <div class="when">{{ c.consultation_date|fdate('%d %b %Y · %I:%M %p') }} · {{ c.doctor_name }}</div>
+          <b>{{ c.diagnosis }}</b>
+          <div class="vitals small">
+            {% if c.blood_pressure %}<div><span>BP</span>{{ c.blood_pressure }} mmHg</div>{% endif %}
+            {% if c.temperature %}<div><span>Temp</span>{{ c.temperature }} °C</div>{% endif %}
+            {% if c.weight %}<div><span>Weight</span>{{ c.weight }} kg</div>{% endif %}
+          </div>
+          <div class="small"><b>Complaint:</b> {{ c.chief_complaint }}</div>
+          {% if c.symptoms %}<div class="small"><b>Symptoms:</b> {{ c.symptoms }}</div>{% endif %}
+          {% if c.notes %}<div class="small muted">{{ c.notes }}</div>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}<div class="empty">No consultations recorded yet.</div>{% endif %}
+    </div>
+    <div class="card">
+      <h2>Prescriptions</h2>
+      {% if prescriptions %}
+      <div class="tablewrap"><table>
+        <thead><tr><th>ID</th><th>Drug</th><th>Dosage</th><th>Duration</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>{% for r in prescriptions %}
+          <tr><td>{{ r.prescription_id|rx }}</td><td>{{ r.drug_name }}<div class="small muted">{{ r.instructions }}</div></td>
+          <td>{{ r.dosage }}{% if r.frequency %}, {{ r.frequency }}{% endif %}</td><td>{{ r.duration }}</td>
+          <td>{{ r.created_at|fdate }}</td>
+          <td><span class="badge {{ 'b-ok' if r.status == 'Dispensed' else 'b-warn' }}">{{ r.status }}</span></td></tr>
+        {% endfor %}</tbody>
+      </table></div>
+      {% else %}<div class="empty">No prescriptions.</div>{% endif %}
+    </div>
+    {% endif %}
+    <div class="card">
+      <h2>Laboratory Results</h2>
+      {% if labs %}
+      <div class="tablewrap"><table>
+        <thead><tr><th>Test ID</th><th>Test</th><th>Requested</th><th>Status</th><th>Result</th></tr></thead>
+        <tbody>{% for l in labs %}
+          <tr><td><a href="{{ url_for('lab_result', rid=l.request_id) }}">{{ l.request_id|tcode }}</a></td><td>{{ l.test_name }}</td>
+          <td class="small">{{ l.request_date|fdate }}<br>{{ l.requested_name }}</td>
+          <td><span class="badge {{ 'b-ok' if l.status == 'Completed' else 'b-warn' }}">{{ l.status }}</span></td>
+          <td>{{ l.result_text or '—' }}{% if l.remarks %}<div class="small muted">{{ l.remarks }}</div>{% endif %}</td></tr>
+        {% endfor %}</tbody>
+      </table></div>
+      {% else %}<div class="empty">No laboratory tests.</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

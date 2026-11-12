@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Patient List</h1><div class="muted">Search and open patient records</div></div>
+  {% if g.user.role_name in (ADMIN, DOCTOR) %}<a class="btn" href="{{ url_for('patient_new') }}">+ Register Patient</a>{% endif %}
+</div>
+<div class="card">
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by name, patient ID, matric/staff ID or phone…">
+    <button class="btn" type="submit">Search</button>
+    {% if q %}<a class="btn alt" href="{{ url_for('patients') }}">Clear</a>{% endif %}
+  </form>
+  <div class="tablewrap" style="margin-top:.8rem">
+  {% if rows %}
+    <table>
+      <thead><tr><th>Patient ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Last Visit</th><th></th></tr></thead>
+      <tbody>
+      {% for p in rows %}
+        <tr>
+          <td><a href="{{ url_for('patient_detail', pid=p.patient_id) }}"><b>{{ p.patient_number }}</b></a></td>
+          <td>{{ p.first_name }} {{ p.last_name }}<div class="small muted">{{ p.matric_staff_id }} · {{ p.patient_type }}</div></td>
+          <td>{{ p.date_of_birth|age }}</td><td>{{ p.sex }}</td><td>{{ p.phone|phone }}</td>
+          <td>{{ p.last_visit|fdate if p.last_visit else '—' }}</td>
+          <td class="right"><a class="btn alt sm" href="{{ url_for('patient_detail', pid=p.patient_id) }}">Open</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty">No matching patient record found{% if q %} for “{{ q }}”{% endif %}.</div>
+  {% endif %}
+  </div>
+  <div class="card-head" style="margin:.8rem 0 0">
+    <div class="small muted">Showing {{ (page-1)*per_page + 1 if total else 0 }}–{{ [page*per_page, total]|min }} of {{ total }} patients</div>
+    <div class="filters">
+      {% if page > 1 %}<a class="btn alt sm" href="{{ url_for('patients', q=q, page=page-1) }}">‹ Prev</a>{% endif %}
+      <span class="small">Page {{ page }} of {{ pages }}</span>
+      {% if page < pages %}<a class="btn alt sm" href="{{ url_for('patients', q=q, page=page+1) }}">Next ›</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Lab Requests{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Lab Requests</h1><div class="muted">Manage pending and ongoing laboratory test requests</div></div>
+  {% if g.user.role_name in (ADMIN, DOCTOR) %}<a class="btn" href="{{ url_for('lab_new') }}">+ New Request</a>{% endif %}</div>
+<div class="card">
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by patient, test ID or test type…">
+    <select name="status"><option value="">All statuses</option>
+      {% for s in ('Pending','Completed') %}<option {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}</select>
+    <button class="btn" type="submit">Filter</button>
+  </form>
+  <div class="tablewrap" style="margin-top:.8rem">
+  {% if rows %}
+  <table>
+    <thead><tr><th>Test ID</th><th>Patient</th><th>Test Type</th><th>Requested By</th><th>Status</th><th>Result</th><th></th></tr></thead>
+    <tbody>{% for r in rows %}
+      <tr>
+        <td><b>{{ r.request_id|tcode }}</b></td>
+        <td>{{ r.patient_name }}<div class="small muted">{{ r.patient_number }}</div></td>
+        <td>{{ r.test_name }}</td><td>{{ r.requested_name }}</td>
+        <td><span class="badge {{ 'b-ok' if r.status == 'Completed' else 'b-warn' }}">{{ r.status }}</span></td>
+        <td class="small">{{ r.result_text or '—' }}</td>
+        <td class="right"><a class="btn alt sm" href="{{ url_for('lab_result', rid=r.request_id) }}">
+          {{ 'Enter result' if (r.status == 'Pending' and g.user.role_name == LAB) else 'View' }}</a></td>
+      </tr>{% endfor %}
+    </tbody>
+  </table>
+  {% else %}<div class="empty">No laboratory requests found.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

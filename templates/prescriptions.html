@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Prescription Interface</h1><div class="muted">Manage patient prescriptions securely</div></div></div>
+<div class="card">
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by patient, drug or ID…">
+    <select name="status"><option value="">All statuses</option>
+      {% for s in ('Pending','Dispensed') %}<option {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}</select>
+    <button class="btn" type="submit">Filter</button>
+  </form>
+  <div class="tablewrap" style="margin-top:.8rem">
+  {% if rows %}
+  <table>
+    <thead><tr><th>Prescription ID</th><th>Patient</th><th>Drug</th><th>Dosage</th><th>Duration</th><th>Date</th><th>Status</th><th>Prescribed by</th><th></th></tr></thead>
+    <tbody>{% for r in rows %}
+      <tr>
+        <td><b>{{ r.prescription_id|rx }}</b></td>
+        <td><a href="{{ url_for('patient_detail', pid=r.patient_id) }}">{{ r.patient_name }}</a><div class="small muted">{{ r.patient_number }}</div></td>
+        <td>{{ r.drug_name }}<div class="small muted">{{ r.instructions }}</div></td>
+        <td>{{ r.dosage }}{% if r.frequency %}<div class="small muted">{{ r.frequency }}</div>{% endif %}</td>
+        <td>{{ r.duration }}</td><td>{{ r.created_at|fdate }}</td>
+        <td><span class="badge {{ 'b-ok' if r.status == 'Dispensed' else 'b-warn' }}">{{ r.status }}</span></td>
+        <td class="small">{{ r.doctor_name }}</td>
+        <td class="right">{% if r.status == 'Pending' %}
+          <form method="post" action="{{ url_for('dispense', rid=r.prescription_id) }}" style="margin:0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm" type="submit">Mark dispensed</button></form>{% endif %}</td>
+      </tr>{% endfor %}
+    </tbody>
+  </table>
+  {% else %}<div class="empty">No prescriptions found.</div>{% endif %}
+  </div>
+  <div class="small muted" style="margin-top:.6rem">All prescriptions are logged to the patient record.</div>
+</div>
+{% endblock %}

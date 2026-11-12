@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Register Patient{% endblock %}
+{% macro err(name) %}{% if errors.get(name) %}<div class="err">{{ errors[name] }}</div>{% endif %}{% endmacro %}
+{% block content %}
+<div class="pagehead"><div><div class="crumb">Patients / Patient Registration</div><h1>Patient Registration Form</h1></div></div>
+<div class="card">
+  <h2>Register New Patient</h2>
+  <p class="muted small">Fill in the patient details to create a new electronic patient record. Fields marked <span class="req">*</span> are required.</p>
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h3 style="margin-top:.8rem">Personal Information</h3>
+    <div class="formgrid">
+      <div><label>First Name <span class="req">*</span></label><input type="text" name="first_name" value="{{ form.get('first_name','') }}" placeholder="Enter first name">{{ err('first_name') }}</div>
+      <div><label>Last Name <span class="req">*</span></label><input type="text" name="last_name" value="{{ form.get('last_name','') }}" placeholder="Enter last name">{{ err('last_name') }}</div>
+      <div><label>Date of Birth <span class="req">*</span></label><input type="date" name="date_of_birth" value="{{ form.get('date_of_birth','') }}">{{ err('date_of_birth') }}</div>
+      <div><label>Gender <span class="req">*</span></label>
+        <select name="sex"><option value="">Select gender</option>
+          {% for s in ('Male','Female') %}<option {{ 'selected' if form.get('sex') == s }}>{{ s }}</option>{% endfor %}</select>{{ err('sex') }}</div>
+      <div><label>Phone <span class="req">*</span></label><input type="text" name="phone" value="{{ form.get('phone','') }}" placeholder="+234 803 214 5670">{{ err('phone') }}</div>
+      <div><label>Matric Number / Staff ID <span class="req">*</span></label><input type="text" name="matric_staff_id" value="{{ form.get('matric_staff_id','') }}" placeholder="MAT20221147 / STAFF2041">{{ err('matric_staff_id') }}</div>
+      <div><label>Patient Type <span class="req">*</span></label>
+        <select name="patient_type">{% for t in ('Student','Staff') %}<option {{ 'selected' if form.get('patient_type') == t }}>{{ t }}</option>{% endfor %}</select>{{ err('patient_type') }}</div>
+      <div><label>Email</label><input type="email" name="email" value="{{ form.get('email','') }}" placeholder="name@example.com">{{ err('email') }}</div>
+      <div class="full"><label>Address <span class="req">*</span></label><input type="text" name="address" value="{{ form.get('address','') }}" placeholder="Enter full address, city, state">{{ err('address') }}</div>
+    </div>
+    <h3 style="margin-top:1.1rem">Emergency &amp; Medical Details</h3>
+    <div class="formgrid">
+      <div><label>Emergency Contact <span class="req">*</span></label><input type="text" name="emergency_contact" value="{{ form.get('emergency_contact','') }}" placeholder="+234 802 345 6789">{{ err('emergency_contact') }}</div>
+      <div><label>Blood Group <span class="req">*</span></label>
+        <select name="blood_group"><option value="">Select blood group</option>
+          {% for b in blood_groups %}<option {{ 'selected' if form.get('blood_group') == b }}>{{ b }}</option>{% endfor %}</select>{{ err('blood_group') }}</div>
+      <div class="full"><label>Allergies</label><textarea name="allergies" placeholder='List any known allergies, or write "None" if no allergies.'>{{ form.get('allergies','') }}</textarea></div>
+    </div>
+    <div class="actions">
+      <button class="btn" type="submit">Save Patient</button>
+      <a class="btn alt" href="{{ url_for('patient_new') }}">Clear</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

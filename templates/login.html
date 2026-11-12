@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login · {{ hospital }} EPR</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="loginpage">
+  <div class="loginbar">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <div><b>{{ hospital }}</b><span>Electronic Patient Record System</span></div>
+  </div>
+  <div class="logincard">
+    <h1>Login to EPR System</h1>
+    <p class="lead">Sign in to access the Electronic Patient Record Management System</p>
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+    <form method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="username">Username</label>
+      <input id="username" type="text" name="username" placeholder="e.g. ngozi.eze" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" placeholder="••••••••" required>
+      <label for="role">Select Role</label>
+      <select id="role" name="role" required>
+        <option value="">Select Role</option>
+        {% for r in roles %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+      </select>
+      <button class="btn" type="submit">Login</button>
+    </form>
+  </div>
+  <div class="loginfoot">Need help? Contact IT Support at support@united.edu.ng · v1.0</div>
+</body>
+</html>

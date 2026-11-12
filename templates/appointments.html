@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Appointments</h1><div class="muted">Book and manage patient appointments</div></div></div>
+<div class="grid g21">
+  <div class="card">
+    <h2>Upcoming Appointments</h2>
+    {% if rows %}
+    <div class="tablewrap"><table>
+      <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Doctor</th><th>Reason</th><th></th></tr></thead>
+      <tbody>{% for a in rows %}
+        <tr><td>{{ a.appointment_date|fdate }}</td><td>{{ a.appointment_time }}</td>
+        <td><a href="{{ url_for('patient_detail', pid=a.patient_id) }}">{{ a.patient_name }}</a><div class="small muted">{{ a.patient_number }}</div></td>
+        <td>{{ a.doctor_name }}</td><td class="small">{{ a.reason or '—' }}</td>
+        <td class="right"><form method="post" action="{{ url_for('appointment_cancel', aid=a.appointment_id) }}" style="margin:0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm" type="submit">Cancel</button></form></td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% else %}<div class="empty">No upcoming appointments.</div>{% endif %}
+  </div>
+  <div class="card">
+    <h2>Book Appointment</h2>
+    {% if error %}<div class="flash warning">{{ error }}</div>{% endif %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Patient <span class="req">*</span></label>
+      <select name="patient_id"><option value="">Select patient</option>
+        {% for p in patients %}<option value="{{ p.patient_id }}" {{ 'selected' if form.get('patient_id') == p.patient_id|string }}>{{ p.first_name }} {{ p.last_name }} ({{ p.patient_number }})</option>{% endfor %}</select>
+      <label>Doctor <span class="req">*</span></label>
+      <select name="doctor_id"><option value="">Select doctor</option>
+        {% for d in doctors %}<option value="{{ d.user_id }}" {{ 'selected' if form.get('doctor_id') == d.user_id|string }}>{{ d.full_name }}</option>{% endfor %}</select>
+      <label>Date <span class="req">*</span></label><input type="date" name="appointment_date" min="{{ min_date }}" value="{{ form.get('appointment_date','') }}">
+      <label>Time <span class="req">*</span></label>
+      <select name="appointment_time">{% for s in slots %}<option {{ 'selected' if form.get('appointment_time') == s }}>{{ s }}</option>{% endfor %}</select>
+      <label>Reason</label><input type="text" name="reason" value="{{ form.get('reason','') }}" placeholder="e.g. Follow-up visit">
+      <div class="actions"><button class="btn" type="submit">Book Appointment</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
